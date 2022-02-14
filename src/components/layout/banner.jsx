@@ -1,13 +1,12 @@
 import styled from "styled-components";
-import BannerImg from "../../assets/img/banner.svg";
+import BannerImg from "../../assets/img/logo_banner.png";
 
 const Banner = () => {
   return (
     <div>
       <BannerContainer>
         <Title>
-          Seguro Auto
-          <p>Faça o melhor seguro veicular e fique tranquilo.</p>
+          <p>Economize até 30% em seu seguro de <span>carro</span> em minutos.</p>
         </Title>
         <ImgBanner src={BannerImg} alt="asd" />
       </BannerContainer>
@@ -28,20 +27,15 @@ const ImgBanner = styled.img`
 `;
 const Title = styled.div`
   flex: 1;
-  font-size: 60px;
+  font-size: 50px;
   text-align: center;
   text-transform: uppercase;
   font-weight: 700;
-  color: #894b9d;
+  color: #00305a;
   display: flex;
   flex-direction: column;
   justify-content: center;
-      p {
-    color: #2880ba;
-    font-size: 22px;
-    flex-wrap: wrap;
-    text-transform: initial;
-    font-weight: 400;
-    text-align: center;
+  span {
+    color: #ec6608;
   }
 `;

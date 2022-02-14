@@ -1,13 +1,13 @@
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import LogoImg from "../../assets/img/logo.png";
+import { IoCarSportSharp } from "react-icons/io5";
 
 const Header = () => {
   return (
     <HeaderContainer>
       <Container>
         <Logo>
-          <Image src={LogoImg} />
+          <Icon />
           SECURE <span>CAR</span>
         </Logo>
       </Container>
@@ -21,22 +21,22 @@ const HeaderContainer = styled.div`
   padding: 20px;
   display: flex;
   justify-content: center;
-  background-color: #282849;
-  border-bottom: 10px solid #92A9D8;
+  background-color: #ffeee0;
 `;
 const Logo = styled.div`
-  color: #fff;
+  color: #00305a;
   font-weight: 600;
-  font-size: 30px;
+  font-size: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   span {
-    color: #92A9D8;
+    color: #ec6608;
   }
 `;
 
-const Image = styled.img`
-  max-width: 50px;
-  margin: 05px;
+const Icon = styled(IoCarSportSharp)`
+  color: #00305a;
+  font-size: 55px;
+  margin-top: -5px;
 `;
