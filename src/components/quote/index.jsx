@@ -1,23 +1,60 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { InputGroup, Input, Container } from "reactstrap";
+import { InputGroup, Input, Container, Button } from "reactstrap";
 import styled from "styled-components";
 import { IMaskInput } from "react-imask";
 import { getCepService } from "../../services/viaCep.service";
+import {
+  getBrandService,
+  getModelsService,
+  getPricesService,
+  getVersionService,
+} from "../../services/parallelum.service";
 import ReactSelect from "react-select";
 import {
   getCitiesFromStateService,
   getStateService,
 } from "../../services/ibge.service";
 
+import acidenteSimples from "../../assets/img/categories/acidente_arvore.png";
+import alagamento from "../../assets/img/categories/alagamento.png";
+import guincho from "../../assets/img/categories/guincho.png";
+import incendio from "../../assets/img/categories/incendio.png";
+import roubo from "../../assets/img/categories/roubo.png";
+import vitimas from "../../assets/img/categories/vitimas.png";
+
+const typeInsurance = [
+  { id: 1, title: "Acidente", img: acidenteSimples, value: 0.02 },
+  { id: 2, title: "Alagamento", img: alagamento, value: 0.03 },
+  { id: 3, title: "Guincho", img: guincho, value: 0.04 },
+  { id: 4, title: "Incêndio", img: incendio, value: 0.05 },
+  { id: 5, title: "Roubo/Furto", img: roubo, value: 0.06 },
+  { id: 6, title: "Acidente com Vitimas", img: vitimas, value: 0.07 },
+];
+
 const Quote = () => {
   const [form, setForm] = React.useState({});
   const [states, setStates] = React.useState([]);
   const [cities, setCities] = React.useState([]);
+  const [brands, setBrands] = React.useState([]);
+  const [models, setModels] = React.useState([]);
+  const [versions, setVersions] = React.useState([]);
+  const [typesSelected, setTypeSelected] = React.useState([]);
 
   const selectCitiesRef = useRef();
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleTypes = (item) => {
+    if (typesSelected.includes(item)) {
+      const novoTypeSelected = typesSelected.filter((t) => t.id !== item.id);
+      setTypeSelected([...novoTypeSelected]);
+      setForm({ ...form, types: novoTypeSelected });
+    } else {
+      setTypeSelected([...typesSelected, item]);
+      setForm({ ...form, types: typesSelected });
+    }
+  };
 
   // buscar a lista de Municipios por estado
 
@@ -26,8 +63,11 @@ const Quote = () => {
     setCities(cities);
   }, []);
 
-  // carregar os Estados
-  useEffect(() => getStateService().then((states) => setStates(states)), []);
+  // Start
+  useEffect(() => {
+    getStateService().then((states) => setStates(states));
+    getBrandService().then((states) => setBrands(states));
+  }, []);
 
   const handleZipCode = (value, mask) => {
     if (value.length === 8) {
@@ -53,9 +93,29 @@ const Quote = () => {
     selectCitiesRef.current.clearValue();
   };
 
+  const handleBrand = async (v) => {
+    const { modelos } = await getModelsService(v.codigo);
+    setModels(modelos);
+    setForm({ ...form, vehicle_brand: v });
+  };
+  const handleModel = async (v) => {
+    const vers = await getVersionService(form.vehicle_brand.codigo, v.codigo);
+    setVersions(vers);
+    setForm({ ...form, vehicle_model: v });
+  };
+
+  const handleVersion = async (v) => {
+    const { vehicle_brand, vehicle_model } = form;
+    const price = await getPricesService(
+      vehicle_brand.codigo,
+      vehicle_model.codigo,
+      v.codigo
+    );
+    setForm({ ...form, vehicle_price: price });
+  };
+
   return (
     <QuoteContainer>
-      {JSON.stringify(form)}
       <Title>Simulação de Cotação de Seguro</Title>
       <QuoteForm>
         <Label>:: Dados do Cliente</Label>
@@ -128,6 +188,7 @@ const Quote = () => {
 
           <InputGroup style={{ width: "40%" }}>
             <ReactSelect
+              isDisabled={cities.length === 0}
               isClearable
               className="flex-grow-1"
               name="localization_city"
@@ -143,100 +204,71 @@ const Quote = () => {
                 setForm({ ...form, localization_city: opt?.nome })
               }
             />
-            {/* <Input
-              name="localization_city"
-              type="select"
-              id="exampleSelect"
-              disabled={!form.localization_state}
-              placeholder="Cidades"
-            >
-              <option></option>
-              {cities?.map((city) => (
-                <option
-                  selected={city.sigla === form.localization_city || null}
-                  key={city.id}
-                  value={city.sigla}
-                >{`${city.nome}`}</option>
-              ))}
-            </Input> */}
           </InputGroup>
         </FormGroup>
         <Label>:: Dados do Veículo</Label>
         <FormGroup>
-          <InputGroup style={{ width: "25%" }}>
-            <Input
-              type="select"
-              id="exampleSelect"
+          <InputGroup style={{ width: "33%" }}>
+            <ReactSelect
+              className="flex-grow-1"
               name="vehicle_brand"
-              onChange={handleChange}
-            >
-              <option># Marca</option>
-              {states?.map((state) => (
-                <option
-                  selected={state.sigla === form.localization_state || null}
-                  key={state.id}
-                  value={state.sigla}
-                >{`${state.sigla} - ${state.nome}`}</option>
-              ))}
-            </Input>
+              isClearable
+              options={brands}
+              placeholder="Marca"
+              getOptionLabel={(option) => option?.nome}
+              getOptionValue={(option) => option?.codigo}
+              onChange={handleBrand}
+            />
           </InputGroup>
-          <InputGroup style={{ width: "25%" }}>
-            <Input
-              type="select"
-              id="exampleSelect"
+          <InputGroup style={{ width: "33%" }}>
+            <ReactSelect
+              className="flex-grow-1"
               name="vehicle_model"
-              onChange={handleChange}
-              disabled
-            >
-              <option># Modelo</option>
-              {states?.map((state) => (
-                <option
-                  selected={state.sigla === form.localization_state || null}
-                  key={state.id}
-                  value={state.sigla}
-                >{`${state.sigla} - ${state.nome}`}</option>
-              ))}
-            </Input>
+              isClearable
+              isDisabled={models.length === 0}
+              options={models}
+              placeholder="Modelo"
+              getOptionLabel={(option) => option?.nome}
+              getOptionValue={(option) => option?.codigo}
+              onChange={handleModel}
+            />
           </InputGroup>
-          <InputGroup style={{ width: "25%" }}>
-            <Input
-              type="select"
-              id="exampleSelect"
-              name="vehicle_year"
-              onChange={handleChange}
-              disabled
-            >
-              <option># Ano</option>
-              {states?.map((state) => (
-                <option
-                  selected={state.sigla === form.localization_state || null}
-                  key={state.id}
-                  value={state.sigla}
-                >{`${state.sigla} - ${state.nome}`}</option>
-              ))}
-            </Input>
-          </InputGroup>
-          <InputGroup style={{ width: "25%" }}>
-            <Input
-              type="select"
-              id="exampleSelect"
-              name="vehicle_price"
-              onChange={handleChange}
-              disabled
-            >
-              <option># Valor</option>
-              {states?.map((state) => (
-                <option
-                  selected={state.sigla === form.localization_state || null}
-                  key={state.id}
-                  value={state.sigla}
-                >{`${state.sigla} - ${state.nome}`}</option>
-              ))}
-            </Input>
+          <InputGroup style={{ width: "33%" }}>
+            <ReactSelect
+              className="flex-grow-1"
+              name="vehicle_brand"
+              isClearable
+              isDisabled={versions.length === 0}
+              options={versions}
+              placeholder="Versão"
+              getOptionLabel={(option) => option?.nome}
+              getOptionValue={(option) => option?.codigo}
+              onChange={handleVersion}
+            />
           </InputGroup>
         </FormGroup>
+
         <Label>:: Tipo do Seguro</Label>
-        {/* <FormGroup>Cereja do Bolo</FormGroup> */}
+        <TypeInsuranceContainer>
+          {typeInsurance.map((item, i) => (
+            <TypeInsurance
+              className={typesSelected.includes(item) ? "active" : ""}
+              key={i}
+              onClick={() =>
+                handleTypes(
+                  item,
+                  typeInsurance.some((val) => item === val)
+                )
+              }
+            >
+              <div className="title">{item.title}</div>
+              <img src={item.img} alt="" />
+            </TypeInsurance>
+          ))}
+        </TypeInsuranceContainer>
+        <FormGroup>
+          <Button>Fazer Simulação</Button>
+        </FormGroup>
       </QuoteForm>
     </QuoteContainer>
   );
@@ -246,6 +278,7 @@ export default Quote;
 const QuoteForm = styled.div`
   display: flex;
   flex-direction: column;
+  margin-bottom: 100px;
 `;
 const Label = styled.div`
   font-family: "Rubik", sans-serif;
@@ -266,16 +299,51 @@ const Title = styled.div`
 `;
 const QuoteContainer = styled(Container)`
   box-shadow: 0 0 24px #cccccc, 0 44px 74px rgb(27 22 66 / 6%);
+  background-color: #fff;
+
   padding: 20px;
   width: 90%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #fff;
+  margin-bottom: 120px;
 `;
 const FormGroup = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 5px;
   padding: 5px 0 20px 0;
+`;
+
+const TypeInsuranceContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 0;
+`;
+
+const TypeInsurance = styled.div`
+  height: 140px;
+  width: 140px;
+  display: block;
+  box-shadow: 0 0 24px #cccccc, 0 44px 74px rgb(27 22 66 / 6%);
+  background-color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+
+  img {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+  }
+  .title {
+    text-align: center;
+    color: #00305a;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  &.active {
+    border: 2px solid #00305a;
+  }
 `;
