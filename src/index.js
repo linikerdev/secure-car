@@ -5,9 +5,9 @@ import Routers from "./Routers";
 import './config/bootstrap'
 
 ReactDOM.render(
-  <React.StrictMode>
+  <React.Fragment>
     <Routers />
     <GlobalStyled />
-  </React.StrictMode>,
+  </React.Fragment>,
   document.getElementById("root")
 );

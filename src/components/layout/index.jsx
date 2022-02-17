@@ -24,6 +24,6 @@ const LayoutContainer = styled.div`
 `;
 
 const Content = styled.div`
-  overflow: hidden;
+  overflow: auto;
   flex: 1;
 `;
