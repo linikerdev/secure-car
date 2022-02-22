@@ -39,6 +39,7 @@ const Quote = () => {
   const [models, setModels] = React.useState([]);
   const [versions, setVersions] = React.useState([]);
   const [typesSelected, setTypeSelected] = React.useState([]);
+  const [formValid, setIFormValid] = React.useState(false);
 
   const selectCitiesRef = useRef();
 
@@ -51,8 +52,9 @@ const Quote = () => {
       setTypeSelected([...novoTypeSelected]);
       setForm({ ...form, types: novoTypeSelected });
     } else {
+      console.log(item);
       setTypeSelected([...typesSelected, item]);
-      setForm({ ...form, types: typesSelected });
+      setForm({ ...form, types: [typesSelected, item] });
     }
   };
 
@@ -68,6 +70,26 @@ const Quote = () => {
     getStateService().then((states) => setStates(states));
     getBrandService().then((states) => setBrands(states));
   }, []);
+
+  useEffect(() => {
+    const validateInputs = [
+      "client_nome",
+      "client_email",
+      "client_phone",
+      "client_birth",
+      "localization_zipcode",
+      "localization_state",
+      "localization_city",
+      "types",
+      "vehicle_brand",
+      "vehicle_model",
+      "vehicle_price",
+    ];
+    const invalidateForm = validateInputs.some(
+      (field) => !form[field] || form[field]?.length === 0
+    );
+    setIFormValid(!invalidateForm);
+  }, [form]);
 
   const handleZipCode = (value, mask) => {
     if (value.length === 8) {
@@ -111,8 +133,10 @@ const Quote = () => {
       vehicle_model.codigo,
       v.codigo
     );
-    setForm({ ...form, vehicle_price: price });
+    setForm({ ...form, vehicle_version: v, vehicle_price: price });
   };
+
+  const SubmitForm = () => console.log(form);
 
   return (
     <QuoteContainer>
@@ -267,7 +291,9 @@ const Quote = () => {
           ))}
         </TypeInsuranceContainer>
         <FormGroup>
-          <Button>Fazer Simulação</Button>
+          <Button disabled={!formValid} onClick={SubmitForm} color="primary">
+            Fazer Simulação
+          </Button>
         </FormGroup>
       </QuoteForm>
     </QuoteContainer>
