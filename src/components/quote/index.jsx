@@ -31,8 +31,7 @@ const typeInsurance = [
   { id: 6, title: "Acidente com Vitimas", img: vitimas, value: 0.07 },
 ];
 
-const Quote = () => {
-  const [form, setForm] = React.useState({});
+const Quote = ({form, setForm, submit}) => {
   const [states, setStates] = React.useState([]);
   const [cities, setCities] = React.useState([]);
   const [brands, setBrands] = React.useState([]);
@@ -49,12 +48,12 @@ const Quote = () => {
   const handleTypes = (item) => {
     if (typesSelected.includes(item)) {
       const novoTypeSelected = typesSelected.filter((t) => t.id !== item.id);
-      setTypeSelected([...novoTypeSelected]);
+      setTypeSelected(novoTypeSelected);
       setForm({ ...form, types: novoTypeSelected });
     } else {
       console.log(item);
       setTypeSelected([...typesSelected, item]);
-      setForm({ ...form, types: [typesSelected, item] });
+      setForm({ ...form, types: typesSelected });
     }
   };
 
@@ -136,7 +135,6 @@ const Quote = () => {
     setForm({ ...form, vehicle_version: v, vehicle_price: price });
   };
 
-  const SubmitForm = () => console.log(form);
 
   return (
     <QuoteContainer>
@@ -291,7 +289,7 @@ const Quote = () => {
           ))}
         </TypeInsuranceContainer>
         <FormGroup>
-          <Button disabled={!formValid} onClick={SubmitForm} color="primary">
+          <Button disabled={!formValid} onClick={submit} color="primary">
             Fazer Simulação
           </Button>
         </FormGroup>
@@ -304,7 +302,7 @@ export default Quote;
 const QuoteForm = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: 100px;
+  margin-bottom: 20px;
 `;
 const Label = styled.div`
   font-family: "Rubik", sans-serif;
@@ -326,13 +324,12 @@ const Title = styled.div`
 const QuoteContainer = styled(Container)`
   box-shadow: 0 0 24px #cccccc, 0 44px 74px rgb(27 22 66 / 6%);
   background-color: #fff;
-
   padding: 20px;
   width: 90%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-bottom: 120px;
+  margin-bottom: 20px;
 `;
 const FormGroup = styled.div`
   display: flex;
