@@ -31,7 +31,7 @@ const typeInsurance = [
   { id: 6, title: "Acidente com Vitimas", img: vitimas, value: 0.07 },
 ];
 
-const Quote = ({form, setForm, submit}) => {
+const Quote = ({ form, setForm, submit }) => {
   const [states, setStates] = React.useState([]);
   const [cities, setCities] = React.useState([]);
   const [brands, setBrands] = React.useState([]);
@@ -44,32 +44,27 @@ const Quote = ({form, setForm, submit}) => {
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-
   const handleTypes = (item) => {
     if (typesSelected.includes(item)) {
       const novoTypeSelected = typesSelected.filter((t) => t.id !== item.id);
       setTypeSelected(novoTypeSelected);
       setForm({ ...form, types: novoTypeSelected });
     } else {
-      console.log(item);
-      setTypeSelected([...typesSelected, item]);
-      setForm({ ...form, types: typesSelected });
+      const selecteds = [...typesSelected, item]
+      setForm({ ...form, types: selecteds });
+      setTypeSelected(selecteds);
     }
   };
-
   // buscar a lista de Municipios por estado
-
   const getCitiesFromState = useCallback(async (uf) => {
     const cities = await getCitiesFromStateService(uf);
     setCities(cities);
   }, []);
-
   // Start
   useEffect(() => {
     getStateService().then((states) => setStates(states));
     getBrandService().then((states) => setBrands(states));
   }, []);
-
   useEffect(() => {
     const validateInputs = [
       "client_nome",
@@ -82,14 +77,13 @@ const Quote = ({form, setForm, submit}) => {
       "types",
       "vehicle_brand",
       "vehicle_model",
-      "vehicle_price",
+      "vehicle_version",
     ];
     const invalidateForm = validateInputs.some(
       (field) => !form[field] || form[field]?.length === 0
     );
     setIFormValid(!invalidateForm);
   }, [form]);
-
   const handleZipCode = (value, mask) => {
     if (value.length === 8) {
       getCepService(value).then(async (res) => {
@@ -105,7 +99,6 @@ const Quote = ({form, setForm, submit}) => {
 
     return false;
   };
-
   const selectState = (opt) => {
     getCitiesFromState(opt?.sigla);
     delete form.localization_city;
@@ -113,7 +106,6 @@ const Quote = ({form, setForm, submit}) => {
     setForm(form);
     selectCitiesRef.current.clearValue();
   };
-
   const handleBrand = async (v) => {
     const { modelos } = await getModelsService(v.codigo);
     setModels(modelos);
@@ -124,7 +116,6 @@ const Quote = ({form, setForm, submit}) => {
     setVersions(vers);
     setForm({ ...form, vehicle_model: v });
   };
-
   const handleVersion = async (v) => {
     const { vehicle_brand, vehicle_model } = form;
     const price = await getPricesService(
@@ -134,7 +125,6 @@ const Quote = ({form, setForm, submit}) => {
     );
     setForm({ ...form, vehicle_version: v, vehicle_price: price });
   };
-
 
   return (
     <QuoteContainer>
@@ -276,12 +266,7 @@ const Quote = ({form, setForm, submit}) => {
             <TypeInsurance
               className={typesSelected.includes(item) ? "active" : ""}
               key={i}
-              onClick={() =>
-                handleTypes(
-                  item,
-                  typeInsurance.some((val) => item === val)
-                )
-              }
+              onClick={() => handleTypes(item)}
             >
               <div className="title">{item.title}</div>
               <img src={item.img} alt="" />
@@ -337,13 +322,11 @@ const FormGroup = styled.div`
   gap: 5px;
   padding: 5px 0 20px 0;
 `;
-
 const TypeInsuranceContainer = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 20px 0;
 `;
-
 const TypeInsurance = styled.div`
   height: 140px;
   width: 140px;

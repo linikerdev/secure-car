@@ -1,20 +1,18 @@
-import { Container } from "reactstrap";
+import { useState } from "react";
 import styled from "styled-components";
-
+const taxaSeguro = 50;
 const Quotation = ({ quote }) => {
+  const [insurance, setInsurance] = useState([]);
   const formCurrency = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
     minimumFractionDigits: 2,
   });
-
   const calcPercent = (priceString, percent) => {
-    console.log("priceString", priceString);
-    console.log("percent", percent);
     const price = parseInt(priceString.replace(/[^\d,]+/g, ""));
-    const calc = Math.round((price * percent) / 10);
-    console.log(formCurrency.format(calc));
-    return formCurrency.format(calc);
+    const value = Math.round((price * percent) / 10);
+    setInsurance([...insurance, value]);
+    return value;
   };
 
   return (
@@ -49,9 +47,7 @@ const Quotation = ({ quote }) => {
       <Label>
         Modelo: <span>{quote?.vehicle_model?.nome}</span>
       </Label>
-      <Label>
-        Versão: <span>{quote?.vehicle_version?.nome}</span>
-      </Label>
+
       <Label>
         Versão: <span>{quote?.vehicle_version?.nome}</span>
       </Label>
@@ -62,7 +58,14 @@ const Quotation = ({ quote }) => {
       {quote.types.length ? (
         <Price>
           <ul>
-            {quote?.types.map((item, i) => <li>{item.title} -  {calcPercent(quote?.vehicle_price?.Valor, item.value)}</li>)}
+            {quote?.types.map((item, i) => (
+              <li key={i}>
+                {item.title} -{" "}
+                {formCurrency.format(
+                  calcPercent(quote?.vehicle_price?.Valor, item.value)
+                )}
+              </li>
+            ))}
           </ul>
           Total de Seguro:
         </Price>
