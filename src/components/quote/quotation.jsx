@@ -1,19 +1,11 @@
 import { useState } from "react";
 import styled from "styled-components";
-const taxaSeguro = 50;
+import { calcFromPrice, insuranceDetails } from "../../config/insurance";
+import { getPriceFromString } from "../../util/helpers";
+
 const Quotation = ({ quote }) => {
-  const [insurance, setInsurance] = useState([]);
-  const formCurrency = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-  });
-  const calcPercent = (priceString, percent) => {
-    const price = parseInt(priceString.replace(/[^\d,]+/g, ""));
-    const value = Math.round((price * percent) / 10);
-    setInsurance([...insurance, value]);
-    return value;
-  };
+  const [insurance, setInsurance] = useState(insuranceDetails(quote));
+
 
   return (
     <QuotationContainer>
@@ -47,7 +39,6 @@ const Quotation = ({ quote }) => {
       <Label>
         Modelo: <span>{quote?.vehicle_model?.nome}</span>
       </Label>
-
       <Label>
         Versão: <span>{quote?.vehicle_version?.nome}</span>
       </Label>
@@ -58,16 +49,22 @@ const Quotation = ({ quote }) => {
       {quote.types.length ? (
         <Price>
           <ul>
-            {quote?.types.map((item, i) => (
+            {insurance.services?.map((item, i) => (
               <li key={i}>
-                {item.title} -{" "}
-                {formCurrency.format(
-                  calcPercent(quote?.vehicle_price?.Valor, item.value)
-                )}
+                {item.title} - {item.price_formated}
               </li>
             ))}
           </ul>
-          Total de Seguro:
+          Base: {insurance.base.formated}
+          <br />
+          Total de Seguro: {insurance.total_formated}
+          <br />
+          Parcelas:
+          {Object.entries(insurance.parcelas)?.map((item, i) => (
+              <li key={i}>
+                {item[0]} x {item[1].formated}
+              </li>
+            ))}
         </Price>
       ) : null}
     </QuotationContainer>
