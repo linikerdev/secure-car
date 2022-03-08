@@ -1,10 +1,9 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { calcFromPrice, insuranceDetails } from "../../config/insurance";
-import { getPriceFromString } from "../../util/helpers";
+import { insuranceDetails } from "../../config/insurance";
 
 const Quotation = ({ quote }) => {
-  const [insurance, setInsurance] = useState(insuranceDetails(quote));
+  const [insurance] = useState(insuranceDetails(quote));
 
 
   return (
