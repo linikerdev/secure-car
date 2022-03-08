@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { insuranceDetails } from "../../services/insurance.service";
 
 const Quotation = ({ quote }) => {
-  const [insurance] = useState(insuranceDetails(quote));
+  const [insurance] = useState(insuranceDetails(quote) || {});
 
   return (
     <QuotationContainer>
@@ -58,7 +58,8 @@ const Quotation = ({ quote }) => {
           Total de Seguro: {insurance.total_formated}
           <br />
           Parcelas:
-          {Object.entries(insurance.parcelas)?.map((item, i) => (
+          
+          {Object.entries(insurance?.parcelas).map((item, i) => (
             <li key={i}>
               {item[0]} x {item[1].formated}
             </li>

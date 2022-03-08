@@ -17,7 +17,7 @@ export const insuranceDetails = (quote) => {
     base: getBaseCar(price),
     services: [],
     total: getBaseCar(price).value,
-    insuranceParcel: {},
+    parcelas: {},
   };
 
   for (let i = 0; i < types.length; i++) {
@@ -32,7 +32,7 @@ export const insuranceDetails = (quote) => {
 
   const valorParcela = insurance.total / insuranceParcel;
   for (let i = 1; i <= insuranceParcel; i++) {
-    insurance.insuranceParcel[i] = {
+    insurance.parcelas[i] = {
       value: valorParcela,
       formated: formCurrency.format(valorParcela),
     };
