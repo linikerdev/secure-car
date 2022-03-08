@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import Banner from "../components/layout/banner";
 import QuoteForm from "../components/quote";
@@ -11,11 +11,20 @@ const Home = () => {
     data: {},
   });
 
-  const SubmitForm = () =>
+  const SubmitForm = () => {
+    const formNew = Object.assign({}, form);
     setQuotation({
       show: true,
-      data: form,
+      data: formNew,
     });
+  };
+
+  useEffect(() => {
+    setQuotation({
+      show: false,
+      data: {},
+    });
+  }, [form]);
 
   return (
     <Container>
